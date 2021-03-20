@@ -2,8 +2,31 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.db.models.fields.files import ImageField
 User = get_user_model()
-# Create your models here.
+
+class LatestproductsManager:
+    
+    @staticmethod
+    def get_products_for_main_page(*args, **kwargs):
+        with_respect_to = kwargs.get('with_respect_to')
+        products = []
+        ct_models = ContentType.objects.filter(model__in=args)
+        for ct_model in ct_models:
+            model_products = ct_model.model_class()._base_manager.all().order_by('-id')[:5]
+            products.extend(model_products)
+        if with_respect_to:
+            ct_model = ContentType.objects.filter(model=with_respect_to)
+            if ct_model.exists():
+                if with_respect_to in args:
+                    return sorted(
+                        products, key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to), reverse=True
+                    )
+        return products
+
+class LatestProducts:
+    
+    objects = LatestproductsManager()
 
 class Category(models.Model):
 	name = models.CharField(max_length=255, verbose_name='Ism kategoriyasi')
@@ -23,6 +46,39 @@ class Product(models.Model):
 
 	def __str__(self):
 		return self.title
+
+
+
+class Notebook(Product):
+    
+    diagonal = models.CharField(max_length=255, verbose_name='Diaganol')
+    display_type = models.CharField(max_length=255, verbose_name='tip display')
+    processor_freq = models.CharField(max_length=255, verbose_name='Chastota protsessor')
+    ram = models.CharField(max_length=255, verbose_name='Operativka')
+    video = models.CharField(max_length=255, verbose_name='Vedio karta')
+    time_without_charge = models.CharField(max_length=255, verbose_name='vreamiya rabota akumlyator')
+    
+    def __str__(self):
+    		return "{} : {}".format(self.category.name, self.title)
+
+
+
+class Smartphone(Product):
+    
+     
+    diagonal = models.CharField(max_length=255, verbose_name='Diaganol')
+    display_type = models.CharField(max_length=255, verbose_name='tip display')
+    resolution = models.CharField(max_length=255, verbose_name='Razreshena erkrana')
+    accum_volume = models.CharField(max_length=255, verbose_name='Obem Batariya')
+    ram = models.CharField(max_length=255, verbose_name='Operativka')
+    sd  = models.BooleanField(default=True)
+    sd_volume_max = models.CharField(max_length=255, verbose_name='Maksimaolniy obem bsravoy pamyatki')
+    main_cam_mp = models.CharField(max_length=255, verbose_name='Glavnaya camera')
+    frontal_cam_mp = models.CharField(max_length=255, verbose_name='frontalnaya camera')
+    
+    def __str__(self):
+        return "{} : {}".format(self.category.name, self.title)
+
 
 
 class CartProduct(models.Model):
@@ -67,3 +123,4 @@ class Specification(models.Model):
 
 	def __str__(self):
 		return "Tovor malumoti: {}".format(self.name)
+
