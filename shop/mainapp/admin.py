@@ -12,22 +12,23 @@ class NotebookAdminForm(ModelForm):
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['image'].help_text = mark_safe('<span style="color:red; font-size:14px;"><b>Rasm formati  {}x{} bo`lishi kk</b></span>'.format(
-            *Product.MIN_RESOLUTION
+        self.fields['image'].help_text = mark_safe(
+            """<span style="color:red; font-size:14px;"><b>Rasm formati  {}x{}dan kam  bo`lishi kerak</b></span>""".format(
+            *Product.MAX_RESOLUTION
         ))
         
-    def clean_image(self):
-        image = self.cleaned_data['image']
-        img = Image.open(image)
-        min_height, min_width = Product.MIN_RESOLUTION
-        max_height, max_width = Product.MAX_RESOLUTION
-        if image.size > Product.MAX_IMAGE_SIZE:
-            raise ValidationError('Rasm razmeri 3MB dan kop!')
-        if img.height < min_height or img.width < min_width:
-            raise ValidationError('Rasm formati tugri emas!')
-        if img.height > max_height or img.width > max_width:
-            raise ValidationError('Rasm formati tugri emas!')
-        return image
+    # def clean_image(self):
+    #     image = self.cleaned_data['image']
+    #     img = Image.open(image)
+    #     min_height, min_width = Product.MIN_RESOLUTION
+    #     max_height, max_width = Product.MAX_RESOLUTION
+    #     if image.size > Product.MAX_IMAGE_SIZE:
+    #         raise ValidationError('Rasm razmeri 3MB dan kop!')
+    #     if img.height < min_height or img.width < min_width:
+    #         raise ValidationError('Rasm formati tugri emas!')
+    #     if img.height > max_height or img.width > max_width:
+    #         raise ValidationError('Rasm formati tugri emas!')
+    #     return image
 
 class NotebookAdmin(admin.ModelAdmin):
 
