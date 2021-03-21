@@ -1,24 +1,31 @@
+from PIL import Image
 from django.forms import ModelChoiceField, ModelForm, ValidationError
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from .models import *
-from PIL import Image
+import PIL
+
 # Register your models here.
 
 
 class NotebookAdminForm(ModelForm):
     
-    MIN_RESOLUTION = (400, 400)
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['image'].help_text = 'Rasm formati  {}x{} bo`lishi kk'.format(
-            *self.MIN_RESOLUTION
-        )
+        self.fields['image'].help_text = mark_safe('<span style="color:red; font-size:14px;"><b>Rasm formati  {}x{} bo`lishi kk</b></span>'.format(
+            *Product.MIN_RESOLUTION
+        ))
+        
     def clean_image(self):
         image = self.cleaned_data['image']
         img = Image.open(image)
-        min_height, min_width = self.MIN_RESOLUTION
+        min_height, min_width = Product.MIN_RESOLUTION
+        max_height, max_width = Product.MAX_RESOLUTION
+        if image.size > Product.MAX_IMAGE_SIZE:
+            raise ValidationError('Rasm razmeri 3MB dan kop!')
         if img.height < min_height or img.width < min_width:
+            raise ValidationError('Rasm formati tugri emas!')
+        if img.height > max_height or img.width > max_width:
             raise ValidationError('Rasm formati tugri emas!')
         return image
 

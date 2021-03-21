@@ -1,9 +1,23 @@
+from PIL import Image
+import PIL
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
-from django.db.models.fields.files import ImageField
+
+
+
 User = get_user_model()
+
+
+class MinResolutionErrorException(Exception):
+    pass
+
+
+class MaxResolutionErrorException(Exception):
+    pass
+
+
 
 class LatestproductsManager:
     
@@ -37,16 +51,37 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-	category = models.ForeignKey(Category, verbose_name='kategory', on_delete=models.CASCADE)
-	title = models.CharField(max_length=255, verbose_name='Naimovinoai')
-	slug = models.SlugField(unique=True)
-	image = models.ImageField(verbose_name='Rasmlar')
-	description = models.TextField(verbose_name='Opsani', null=True)
-	price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Narx')
-
-	def __str__(self):
-		return self.title
-
+    
+    MIN_RESOLUTION = (400, 400)
+    MAX_RESOLUTION = (800, 800)
+    MAX_IMAGE_SIZE = 3145728
+    
+    
+    class Meta:
+        abstract = True
+        
+        
+    category = models.ForeignKey(Category, verbose_name='kategory', on_delete=models.CASCADE)
+    title = models.CharField(max_length=255, verbose_name='Naimovinoai')
+    slug = models.SlugField(unique=True)
+    image = models.ImageField(verbose_name='Rasmlar')
+    description = models.TextField(verbose_name='Opsani', null=True)
+    price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Narx')
+    
+    def __str__(self):
+        return self.title
+    
+    def save(self, *args, **kwargs):
+        image = self.image
+        img = Image.open(image)
+        min_height, min_width = self.MIN_RESOLUTION
+        max_height, max_width = self.MAX_RESOLUTION
+        
+        if img.height < min_height or img.width < min_width:
+            raise MinResolutionErrorException('Rasm formati tugri emas!')
+        if img.height > max_height or img.width > max_width:
+            raise MaxResolutionErrorException('Rasm formati tugri emas!')
+        return image
 
 
 class Notebook(Product):
