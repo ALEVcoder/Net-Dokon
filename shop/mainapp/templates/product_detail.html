@@ -1,19 +1,27 @@
 {% extends 'base.html' %}
-
+{% load specifications %}
 {% block content %}
-
+	<nav aria-label="breadcrumb" class="mt-3">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="{% url 'base' %}">Home</a></li>
+			<li class="breadcrumb-item"><a href="#">{{ product.category.name }}</a></li>
+			<li class="breadcrumb-item active"><a href="#">{{ product.title }}</a></li>
+		</ol>
+	</nav>
     <div class="row">
         <div class="col-md-4">
-
+        	<img src="{{ product.image.url }}" class="img-fluid">
         </div>
         <div class="col-md-8">
-            
+          	<h3>{{ product.title }}</h3>
+          	<p>Narxi: {{ product.price }} Dollor.</p> 
+          	<p>Malumot: {{ product.description }}</p>
         </div>
-    </div>
+        <p class="mt-4">Xarakterichiskisi</p> 
 
+        {{ product|product_spec }}
 
-
-    {{ product.title }}
+    </div>  
 
 
 
