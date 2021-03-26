@@ -97,8 +97,10 @@ class Smartphone(Product):
     resolution = models.CharField(max_length=255, verbose_name='Razreshena erkrana')
     accum_volume = models.CharField(max_length=255, verbose_name='Obem Batariya')
     ram = models.CharField(max_length=255, verbose_name='Operativka')
-    sd  = models.BooleanField(default=True)
-    sd_volume_max = models.CharField(max_length=255, verbose_name='Maksimaolniy obem bsravoy pamyatki')
+    sd  = models.BooleanField(default=True, verbose_name='Nachilo Cd karta')
+    sd_volume_max = models.CharField(
+        max_length=255, null=True, blank=True, verbose_name='Maksimaolniy obem bsravoy pamyatki'
+    )
     main_cam_mp = models.CharField(max_length=255, verbose_name='Glavnaya camera')
     frontal_cam_mp = models.CharField(max_length=255, verbose_name='frontalnaya camera')
     
@@ -106,6 +108,12 @@ class Smartphone(Product):
         return "{} : {}".format(self.category.name, self.title)
     def get_absolute_url(self):
         return get_product_url(self, 'product_detail')
+    
+    # @property
+    # def sd(self):
+    #     if self.sd:
+    #         return 'da'
+    #     return 'Net'
 
 
 class CartProduct(models.Model):
@@ -118,21 +126,19 @@ class CartProduct(models.Model):
 	final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Obshe narx')
 
 	def __str__(self):
-		return "Produkt: {} (dlya Korzinka)".format(self.product.title)
+		return "Produkt: {} (dlya Korzinka)".format(self.content_object.title)
 
 
 class Cart(models.Model):
-
-
-	owner = models.ForeignKey('Customer', verbose_name='Vladelsiya', on_delete=models.CASCADE)
-	products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart')
-	total_product = models.PositiveIntegerField(default=8)
-	final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Obshe Narx')
-
-
-
-	def __str__(self):
-		return str(self.id)
+    owner = models.ForeignKey('Customer', verbose_name='Vladelsiya', on_delete=models.CASCADE)
+    products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart')
+    total_product = models.PositiveIntegerField(default=8)
+    final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Obshe Narx')
+    in_order = models.BooleanField(default=False)
+    for_anonmous_user = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return str(self.id)
 		
 
 class Customer(models.Model):
